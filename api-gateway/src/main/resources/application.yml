@@ -1,0 +1,42 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: api-gateway
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    gateway:
+      globalcors: # 跨域处理
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://127.0.0.1:5500"
+              - "http://localhost:8000"
+            allowedMethods:
+              - GET
+              - POST
+            allowedHeaders: "*"
+            allowCredentials: true
+      default-filters:
+        - AddResponseHeader=source, api-gateway # 流量染色，说明响应源于 api-gateway
+      routes:
+        - id: backend_route # 请求转发到 api-backend
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/backend/**
+        - id: interface_route # 请求转发到 api-interface
+          uri: http://localhost:8100
+          predicates:
+            - Path=/api/interface/**
+dubbo:
+  application:
+    name: consumer-client
+  registry:
+    address: nacos://127.0.0.1:8848
+    username: nacos
+    password: nacos
+api: #测试用
+  client:
+    access-key: 5ad1086d8f347665f184ab61ebe37c87
+    secret-key: ef4e4ac32b5bad82682baf50fb2e7dd3
